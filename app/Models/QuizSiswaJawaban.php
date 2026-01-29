@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class QuizSiswaJawaban extends Model
+{
+    protected $fillable = [
+        'quiz_siswa_history_id',
+        'siswa_id',
+        'quiz_bank_soal_id',
+        'quiz_jawaban_soal_id',
+        'is_correct',
+        'jawaban_texts'
+    ];
+
+    protected $casts = [
+        'is_correct' => 'boolean',
+    ];
+}
