@@ -20,8 +20,8 @@ class JadwalQuiz extends Model
 
     ];
     protected $casts = [
-        'mulai' => 'datetime',
-        'selesai' => 'datetime',
+        'mulai' => 'datetime:Y-m-d H:i:s',
+        'selesai' => 'datetime:Y-m-d H:i:s',
     ];
     public function kelas()
     {

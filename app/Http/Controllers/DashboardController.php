@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kelas;
+use App\Models\QuizSiswaHistory;
 use App\Models\Tugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,9 +35,14 @@ class DashboardController extends Controller
 
     public function pendingQuiz()
     {
-        $user = request()->all();
+        $user = request()->user();
         $kelas_id = collect(request('kelas'))->get('id');
-        $kelas = Kelas::whereId($kelas_id)->with('activeQuiz')->first();
+        $kelas = Kelas::whereId($kelas_id)->with(['activeQuiz' => function ($query) use ($user) {
+            $sudahSelesai = QuizSiswaHistory::where('siswa_id', $user->id)
+                ->whereNotNull('end_date')
+                ->pluck('jadwal_quiz_id');
+            $query->whereNotIn('id', $sudahSelesai);
+        }])->first();
         return $kelas;
     }
 }

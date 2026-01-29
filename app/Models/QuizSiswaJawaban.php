@@ -18,4 +18,12 @@ class QuizSiswaJawaban extends Model
     protected $casts = [
         'is_correct' => 'boolean',
     ];
+    public function soal()
+    {
+        return $this->belongsTo(QuizBankSoal::class, 'quiz_bank_soal_id');
+    }
+    public function jawaban()
+    {
+        return $this->belongsTo(QuizJawabanSoal::class, 'quiz_jawaban_soal_id');
+    }
 }

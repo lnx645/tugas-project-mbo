@@ -15,8 +15,8 @@ class QuizSiswaHistory extends Model
         'score_result',
     ];
     protected $casts = [
-        'start_date' => 'datetime',
-        'end_date' => 'datetime',
+        'start_date' => 'datetime:Y-m-d H:i:s',
+        'end_date' => 'datetime:Y-m-d H:i:s',
         'score_result' => 'double',
         'remaining_time' => 'integer',
     ];

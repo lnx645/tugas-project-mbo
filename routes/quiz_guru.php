@@ -9,8 +9,8 @@ Route::get('', [QuizController::class, 'index'])->name('mainGuru');
 Route::get('jadwal', [JadwalQuizController::class, 'index'])->name('jadwalQuizGuru');
 Route::get('tambah-jadwal', [JadwalQuizController::class, 'tambah'])->name('formTambahJadwal');
 Route::post('tambah-jadwal', [JadwalQuizController::class, 'simpanJadwal'])->name('simpanJadwal');
-Route::put('edit-jadwal-{id}', [JadwalQuizController::class, 'editJadwal'])->name('editJadwal');
-Route::get('edit-jadwal-{id}', [JadwalQuizController::class, 'simpanEditJadwal'])->name('simpanEditJadwal');
+Route::get('edit-jadwal-{id}', [JadwalQuizController::class, 'editJadwal'])->name('editJadwal');
+Route::put('edit-jadwal-{id}', [JadwalQuizController::class, 'simpanEditJadwal'])->name('simpanEditJadwal');
 
 
 

@@ -33,9 +33,10 @@ class Kelas extends Model
     }
     public function activeQuiz()
     {
-        $now = now('Asia/Jakarta');
+        $now = now();
+
         return $this->hasMany(JadwalQuiz::class)
             ->where('mulai', '<=', $now)
-            ->where('selesai', '>=', $now);;
+            ->where('selesai', '>=', $now);
     }
 }

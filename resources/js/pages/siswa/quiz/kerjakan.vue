@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { autoSaveJawaban } from '@/routes';
+import { autoSaveJawaban, selesaikanUjian } from '@/routes';
 import { useForm, usePage } from '@inertiajs/vue3';
 import { LayoutGrid, Timer, UserCircle } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'; // Tambah onMounted
@@ -53,7 +53,12 @@ function prevSoal() {
 
 function submitUjian(isAuto = false) {
     if (isAuto || confirm('YAKIN AKAN MENGAKHIRI UJIAN? Periksa kembali jawaban Anda.')) {
-        form.post('/siswa/quiz/submit');
+        form.submit(
+            selesaikanUjian({
+                id: soalsData.value.jadwal_quiz_id,
+                history_id: soalsData.value.id,
+            }),
+        );
     }
 }
 

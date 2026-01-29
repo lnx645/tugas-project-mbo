@@ -8,12 +8,13 @@ import MenuItem from './menu-item.vue';
 
 import NilaiController from '@/actions/App/Http/Controllers/Siswa/NilaiController';
 import { showTugas } from '@/actions/App/Http/Controllers/TugasSiswaController';
+import { siwaQuiz } from '@/routes';
 </script>
 
 <template>
     <MenuItem label="Akademik" href="/" :has-dropdown="true" :icon="SolarSquareAcademicCap2Bold">
         <MenuItem label="Materi" :href="showMateri()" :icon="MaterialSymbolsMenuBookOutlineRounded" />
-         <MenuItem label="Quiz" :href="showTugas()" :icon="HugeiconsTaskDaily01" />
+        <MenuItem label="Quiz" :href="siwaQuiz()" :icon="HugeiconsTaskDaily01" />
         <MenuItem label="Tugas" :href="showTugas()" :icon="HugeiconsTaskDaily01" />
         <MenuItem label="Nilai" :href="NilaiController()" :icon="MaterialSymbolsMarkdownPaste" />
     </MenuItem>

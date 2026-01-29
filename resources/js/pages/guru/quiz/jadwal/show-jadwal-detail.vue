@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { editJadwal } from '@/routes';
+import { Link } from '@inertiajs/vue3';
 import { BookOpenIcon, CalendarIcon, ClipboardCheckIcon, ClockIcon, UserIcon, XIcon } from 'lucide-vue-next';
 import { ref } from 'vue';
-
 // State untuk modal
 const isModalOpen = ref(false);
 const selectedJadwal = ref<any>(null);
@@ -112,7 +113,11 @@ const props = defineProps<{
                     >
                         Tutup
                     </button>
-                    <button class="rounded bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700">Edit Jadwal</button>
+                    <Link
+                        :href="editJadwal({ id: selectedJadwal.id })"
+                        class="rounded bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-blue-700"
+                        >Edit Jadwal</Link
+                    >
                 </div>
             </div>
         </div>

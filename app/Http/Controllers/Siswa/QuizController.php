@@ -10,11 +10,33 @@ use App\Models\QuizSiswaJawaban;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
+use function Symfony\Component\Clock\now;
+
 class QuizController extends Controller
 {
-    public function index()
+    public function hasilDetail(Request $request, string $history_id)
     {
-        return "WKWKW";
+        $user_id = $request->user()->id;
+        $historyDetail = QuizSiswaHistory::with([
+            'jawaban_tersimpan',
+            'jadwalQuiz',
+            'jawaban_tersimpan.soal',
+            'jawaban_tersimpan.jawaban'
+        ])->whereSiswaId($user_id)->where('id', $history_id)->first();
+        return inertia('siswa/quiz/hasil-quiz', [
+            'history' => $historyDetail,
+        ]);
+    }
+    public function index(Request $request)
+    {
+        $user_id = $request->user()->id;
+        $histories = QuizSiswaHistory::with([
+            'jawaban_tersimpan',
+            'jadwalQuiz',
+        ])->whereSiswaId($user_id)->get();
+        return inertia('siswa/quiz/index', [
+            'histories' => $histories,
+        ]);
     }
     public function start(Request $request, string $id)
     {
@@ -28,6 +50,23 @@ class QuizController extends Controller
         return to_route('kerjakanQuiz', [
             'id' => $id,
             'history_id' => $create->id,
+        ]);
+    }
+    public function selesai(Request $request, string $id, $history_id)
+    {
+        $history = QuizSiswaHistory::with(['jadwalQuiz', 'jawaban_tersimpan'])->find($history_id);
+        if ($history->siswa_id !== $request->user()->id) {
+            return to_route('home');
+        }
+        $jawaban = $history->jawaban_tersimpan;
+        [$benar] = $jawaban->partition(fn($item) => $item->is_correct == 1);
+        $totalSoal = $history->jadwalQuiz->total_soal;
+        $jumlahBenar = $benar->count();
+
+        $nilai = ($totalSoal > 0) ? ($jumlahBenar / $totalSoal) * 100 : 0;
+        $history->update([
+            'score_result' => $nilai,
+            'end_date' => Carbon::now(),
         ]);
     }
     public function autoSaveJawaban(Request $request, string $jadwal, string $history)

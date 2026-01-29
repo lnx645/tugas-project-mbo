@@ -43,6 +43,45 @@ class JadwalQuizController extends Controller
             return  JadwalQuiz::create($validated);
         });
     }
+    public function simpanEditJadwal(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'judul'            => 'required|string|max:255',
+            'quiz_category_id' => 'required',
+            'kelas_id'         => 'required',
+            'total_soal'       => 'required|numeric',
+            'max_attempts'     => 'required|numeric',
+            'kkm'              => 'required|numeric',
+            'mulai'            => 'required',
+            'selesai'          => 'required',
+            'durasi'           => 'required|numeric',
+        ]);
+
+        $jadwal = JadwalQuiz::where('user_id', $request->user()->id)
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $jadwal->update($validated);
+
+        return redirect()->route('jadwalQuizGuru')
+            ->with('message', 'Jadwal berhasil diperbarui!');
+    }
+    public function editJadwal(Request $request, KelasServiceInterface $kelasService, string $id)
+    {
+        $kelas = $kelasService->getKelasByGuru($request->role_id);
+        $bankSoals = QuizCategory::where([
+            'user_id' => $request->user()->id,
+        ])
+            ->withCount('bankSoals')->get();
+        $jadwal = JadwalQuiz::whereUserId($request->user()->id)->where([
+            'id' => $id
+        ])->first();
+        return inertia('guru/quiz/jadwal/edit', [
+            'listKelas' => $kelas,
+            'jadwal' => $jadwal,
+            'bankSoals' => $bankSoals,
+        ]);
+    }
     public function tambah(Request $request, KelasServiceInterface $kelasService)
     {
         $kelas = $kelasService->getKelasByGuru($request->role_id);
