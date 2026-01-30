@@ -1,31 +1,27 @@
 <script setup lang="ts">
 import { kerjakanQuiz, siwaQuizStart } from '@/routes';
 import { Link } from '@inertiajs/vue3';
-import { AlertCircleIcon, ArrowRightIcon, BookOpenIcon, CheckCircle2Icon, ClockIcon, PlayIcon, TimerIcon } from 'lucide-vue-next';
+import { AlertCircleIcon, ArrowRightIcon, BookOpenIcon, CheckCircle2Icon, ClockIcon, PlayIcon } from 'lucide-vue-next';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps<{
     quiz: any;
-    pengerjaan: any; // Data dari tabel quiz_siswa_histories
+    pengerjaan: any;
 }>();
+
 // --- LOGIKA TIMER REAL-TIME ---
 const totalSeconds = ref(0);
 let timerInterval: any = null;
 
 const calculateInitialSeconds = () => {
     if (!props.pengerjaan) return 0;
-
-    // Jika ada remaining_time di DB (asumsi menit), konversi ke detik
     if (props.pengerjaan.remaining_time !== null) {
         return props.pengerjaan.remaining_time * 60;
     }
-
-    // Jika null, hitung selisih: (start_date + durasi) - sekarang
     const startTime = new Date(props.pengerjaan.start_date).getTime();
     const durationInMs = props.quiz.durasi * 60 * 1000;
     const endTime = startTime + durationInMs;
     const now = new Date().getTime();
-
     return Math.max(0, Math.floor((endTime - now) / 1000));
 };
 
@@ -34,13 +30,11 @@ const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
-    // Padding nol (misal 9 jadi 09)
     return [h, m, s].map((v) => (v < 10 ? '0' + v : v)).join(':');
 };
 
 const displayTime = computed(() => formatTime(totalSeconds.value));
 
-// --- LOGIKA STATUS ---
 const statusPengerjaan = computed(() => {
     if (!props.pengerjaan) return 'BELUM_MULAI';
     if (props.pengerjaan.end_date) return 'SUDAH_SELESAI';
@@ -73,128 +67,121 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-        <div class="mx-auto max-w-3xl">
-            <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-                <div class="border-b border-gray-100 p-8">
-                    <div class="mb-2 flex items-center gap-2 text-blue-600">
-                        <span class="text-xs font-bold tracking-widest uppercase">Konfirmasi Ujian</span>
+    <div class="px-4 py-12 font-serif text-[#333]">
+        <div class="mx-auto">
+            <div class="overflow-hidden border-2 border-[#003366] bg-white shadow-[8px_8px_0px_rgba(0,0,0,0.1)]">
+                <div class="flex items-center justify-between border-b-4 border-[#ffcc00] bg-[#003366] p-4 text-white">
+                    <div class="flex items-center gap-3">
+                        <div class="rounded-sm bg-white p-1 text-xs font-black text-[#003366] italic">QUIZ</div>
+                        <h2 class="text-xs font-bold tracking-widest uppercase">Konfirmasi Data Quiz</h2>
                     </div>
-                    <h1 class="mb-6 text-3xl leading-tight font-black text-gray-900">{{ quiz.judul }}</h1>
-
-                    <div class="flex flex-wrap gap-6 text-sm">
-                        <div class="flex items-center gap-2 font-medium text-gray-700">
-                            <div class="rounded-lg bg-blue-50 p-2 text-blue-600">
-                                <ClockIcon class="h-4 w-4" />
-                            </div>
-                            <span>Durasi: {{ quiz.durasi }} Menit</span>
-                        </div>
-                        <div class="flex items-center gap-2 font-medium text-gray-700">
-                            <div class="rounded-lg bg-indigo-50 p-2 text-indigo-600">
-                                <BookOpenIcon class="h-4 w-4" />
-                            </div>
-                            <span>{{ quiz.total_soal }} Butir Soal</span>
-                        </div>
-                    </div>
+                    <span class="font-mono text-[10px] uppercase italic opacity-70">v.2026.1.1</span>
                 </div>
 
-                <div
-                    class="grid grid-cols-1 divide-y divide-gray-100 bg-gray-50/50 text-center md:grid-cols-2 md:divide-x md:divide-y-0 md:text-left"
-                >
-                    <div class="p-6">
-                        <span class="mb-1 block text-[10px] font-bold tracking-wider text-gray-400 uppercase">Quiz Dibuka</span>
-                        <p class="text-sm font-bold text-gray-700">{{ formatTanggal(quiz.mulai) }}</p>
+                <div class="p-8">
+                    <div class="mb-8 border-b-2 border-dashed border-gray-300 pb-6 text-center md:text-left">
+                        <span class="text-[10px] font-bold tracking-widest text-blue-600 uppercase">Mata Uji Yang Dipilih:</span>
+                        <h1 class="mt-1 text-3xl leading-tight font-black text-gray-900 uppercase">{{ quiz.judul }}</h1>
                     </div>
-                    <div class="p-6">
-                        <span class="mb-1 block text-[10px] font-bold tracking-wider text-gray-400 uppercase">Quiz Ditutup</span>
-                        <p class="text-sm font-bold text-gray-700">{{ formatTanggal(quiz.selesai) }}</p>
-                    </div>
-                </div>
 
-                <div class="space-y-8 p-8">
-                    <div class="rounded-lg border-l-4 border-blue-500 bg-blue-50/50 p-4">
-                        <div class="flex">
-                            <AlertCircleIcon class="mr-3 h-5 w-5 shrink-0 text-blue-500" />
+                    <div class="mb-8 grid grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3 border border-gray-300 bg-[#f8f9fa] p-3">
+                            <ClockIcon class="h-5 w-5 text-gray-400" />
                             <div>
-                                <h3 class="text-sm font-bold text-blue-900">Peringatan:</h3>
-                                <ul class="mt-2 list-inside list-disc space-y-1 text-sm text-blue-800/80">
-                                    <li>Koneksi internet harus stabil selama pengerjaan.</li>
-                                    <li>Waktu berjalan secara otomatis sejak Anda menekan tombol mulai.</li>
+                                <p class="text-[9px] font-bold text-gray-500 uppercase">Alokasi Waktu</p>
+                                <p class="text-sm font-bold">{{ quiz.durasi }} Menit</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 border border-gray-300 bg-[#f8f9fa] p-3">
+                            <BookOpenIcon class="h-5 w-5 text-gray-400" />
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-500 uppercase">Jumlah Soal</p>
+                                <p class="text-sm font-bold">{{ quiz.total_soal }} Butir</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-8 border border-yellow-400 bg-yellow-50 p-4">
+                        <div class="flex gap-3">
+                            <AlertCircleIcon class="h-5 w-5 shrink-0 text-yellow-600" />
+                            <div>
+                                <h3 class="text-xs font-bold text-yellow-900 uppercase underline">Petunjuk Pengerjaan:</h3>
+                                <ul class="mt-2 list-inside list-disc space-y-1 text-[11px] font-medium text-yellow-800">
+                                    <li>Klik tombol <strong>MULAI</strong> untuk memulai ujian.</li>
+                                    <li>Waktu akan dihitung mundur secara otomatis oleh sistem.</li>
+                                    <li>Pastikan indikator koneksi di pojok kanan atas berwarna hijau.</li>
                                     <li>
-                                        Skor minimal kelulusan (KKM) adalah <strong>{{ quiz.kkm }}</strong
-                                        >.
+                                        Batas Nilai Minimal (KKM): <strong>{{ quiz.kkm }}</strong>
                                     </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex flex-col items-center">
+                    <div class="flex flex-col items-center border-t-2 border-gray-100 pt-8">
                         <div v-if="statusPengerjaan === 'BELUM_MULAI'" class="w-full text-center">
                             <Link
-                                :href="siwaQuizStart({ id: quiz.id })"
-                                class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-10 py-4 text-base font-bold text-white shadow-lg shadow-blue-200 transition-all hover:bg-blue-700 active:scale-95 sm:w-auto"
+                                method="post"
+                                :href="siwaQuizStart({ id: quiz.id }).url"
+                                class="inline-flex w-full items-center justify-center border-b-4 border-black bg-[#006633] px-10 py-4 text-sm font-bold tracking-widest text-white uppercase shadow-lg transition-all hover:bg-black active:translate-y-[2px] active:border-b-0 sm:w-auto"
                             >
-                                <PlayIcon class="mr-2 h-5 w-5 fill-current" />
-                                Mulai Kerjakan Sekarang
+                                <PlayIcon class="mr-2 h-4 w-4 fill-current" />
+                                Mulai Ujian Sekarang
                             </Link>
-                            <p class="mt-4 text-xs text-gray-400">Pastikan Anda sudah siap sebelum memulai.</p>
+                            <p class="mt-4 text-center font-mono text-[9px] font-bold tracking-widest text-gray-400 uppercase italic">
+                                *** Tombol aktif saat jadwal dimulai ***
+                            </p>
                         </div>
 
                         <div v-else-if="statusPengerjaan === 'SEDANG_BERJALAN'" class="w-full">
-                            <div class="mb-8 rounded-2xl border border-orange-200 bg-orange-50 p-8 text-center shadow-inner">
-                                <div class="mb-3 flex items-center justify-center gap-2 text-orange-600">
-                                    <TimerIcon class="h-5 w-5 animate-pulse" />
-                                    <span class="text-xs font-black tracking-widest uppercase">Sisa Waktu Anda</span>
+                            <div class="relative mb-8 overflow-hidden border-2 border-orange-400 bg-orange-50 p-6 text-center">
+                                <div class="absolute top-0 left-0 bg-orange-400 px-2 py-0.5 text-[8px] font-bold text-white uppercase">
+                                    Sisa Waktu
                                 </div>
-                                <div class="md:text-md font-mono text-5xl font-black tracking-tight text-orange-700">
+                                <div class="py-2 font-mono text-5xl font-black tracking-tighter text-orange-700">
                                     {{ displayTime }}
                                 </div>
-                                <div class="mt-4 flex justify-center gap-8 text-[10px] font-bold tracking-tighter text-orange-400 uppercase">
-                                    <span>Jam</span>
-                                    <span>Menit</span>
-                                    <span>Detik</span>
-                                </div>
                             </div>
-
-                            <div class="text-center">
+                            <div class="flex justify-center">
                                 <Link
-                                    :href="
-                                        kerjakanQuiz({
-                                            id: quiz.id,
-                                            history_id: pengerjaan.id,
-                                        })
-                                    "
-                                    class="inline-flex w-full items-center justify-center rounded-xl bg-orange-500 px-12 py-4 text-base font-bold text-white shadow-lg shadow-orange-200 transition-all hover:bg-orange-600 active:scale-95 sm:w-auto"
+                                    :href="kerjakanQuiz({ id: quiz.id, history_id: pengerjaan.id }).url"
+                                    class="inline-flex w-full items-center justify-center border-b-4 border-black bg-[#003366] px-12 py-4 text-sm font-bold tracking-widest text-white uppercase shadow-lg transition-all hover:bg-black active:translate-y-[2px] active:border-b-0 sm:w-auto"
                                 >
-                                    Lanjutkan Ujian
-                                    <ArrowRightIcon class="ml-2 h-5 w-5" />
+                                    Lanjutkan Pengerjaan
+                                    <ArrowRightIcon class="ml-2 h-4 w-4" />
                                 </Link>
-                                <p class="mt-4 text-xs text-gray-500">Sesi pengerjaan Anda masih aktif.</p>
                             </div>
                         </div>
 
-                        <div v-else-if="statusPengerjaan === 'SUDAH_SELESAI'" class="w-full">
-                            <div class="flex flex-col items-center rounded-2xl border border-green-100 bg-green-50/50 p-10 text-center">
-                                <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600">
-                                    <CheckCircle2Icon class="h-10 w-10" />
+                        <div v-else-if="statusPengerjaan === 'SUDAH_SELESAI'" class="w-full text-center">
+                            <div class="border-2 border-green-600 bg-green-50 p-8">
+                                <CheckCircle2Icon class="mx-auto mb-4 h-12 w-12 text-green-600" />
+                                <h3 class="text-lg font-black text-green-900 uppercase">Ujian Telah Selesai</h3>
+                                <p class="mt-1 text-xs font-bold tracking-tighter text-green-700 uppercase italic">
+                                    Hasil pengerjaan sudah terkirim ke server pusat
+                                </p>
+
+                                <div class="my-6 border-t border-green-200"></div>
+
+                                <span class="text-[9px] font-bold tracking-widest text-green-500 uppercase">Perolehan Skor</span>
+                                <div class="mt-1 font-mono text-6xl font-black text-green-700">
+                                    {{ Math.round(pengerjaan.score_result) }}
                                 </div>
-                                <h3 class="text-xl font-bold text-green-900">Quiz Telah Diselesaikan</h3>
-                                <p class="mt-2 text-sm text-green-700/70 italic">Data jawaban Anda sudah kami simpan di sistem.</p>
 
-                                <div class="my-8 h-[1px] w-full bg-green-100"></div>
-
-                                <span class="text-xs font-bold tracking-widest text-green-500 uppercase">Skor Akhir</span>
-                                <div class="text-5xl font-black text-green-600">
-                                    {{ pengerjaan.score_result }}
-                                </div>
-
-                                <Link href="/siswa/dashboard" class="mt-10 text-sm font-bold text-gray-400 transition-colors hover:text-gray-600">
-                                    &larr; Kembali ke Dashboard
+                                <Link
+                                    href="/"
+                                    class="mt-8 inline-block border-b border-gray-300 text-[10px] font-bold text-gray-400 uppercase hover:text-blue-600"
+                                >
+                                    &larr; Kembali ke halaman utama
                                 </Link>
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <div class="flex justify-between border-t border-gray-300 bg-gray-100 p-2 px-4 font-mono text-[9px] text-gray-400 uppercase">
+                    <span>Server: OK | Client: OK</span>
+                    <span>LOG_TIME: {{ new Date().toLocaleTimeString() }}</span>
                 </div>
             </div>
         </div>
@@ -202,8 +189,29 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-/* Opsional: Mencegah angka timer bergeser saat berubah (tabular nums) */
+/* Reset font untuk look jadul */
+button,
+input,
+h1,
+h2,
+h3,
+p,
+div,
+span,
+a {
+    font-family: 'Arial', sans-serif;
+    border-radius: 0px !important;
+}
+
 .font-mono {
+    font-family: 'Courier New', Courier, monospace;
     font-variant-numeric: tabular-nums;
+}
+
+/* Hilangkan rounded secara paksa */
+.rounded-xl,
+.rounded-lg,
+.rounded-2xl {
+    border-radius: 0px !important;
 }
 </style>

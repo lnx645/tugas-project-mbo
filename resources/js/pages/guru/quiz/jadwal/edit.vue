@@ -1,4 +1,6 @@
 <script setup lang="ts">
+//@ts-expect-error
+//@ts-nocheck
 import Input from '@/components/input.vue';
 import PageTitle from '@/layouts/page-title.vue';
 import { simpanEditJadwal } from '@/routes';

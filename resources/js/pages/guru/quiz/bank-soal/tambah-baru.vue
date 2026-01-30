@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'; // Tambahkan watch
-import { useForm, Head, usePage } from '@inertiajs/vue3';
-import PageTitle from '@/layouts/page-title.vue';
+//@ts-expect-error
+//@ts-nocheck
 import { simpanBankSoal } from '@/routes';
-const category_id = computed(() => usePage().props.category_id as any)
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import { ChevronLeft, Image as ImageIcon, Plus, Save, Trash2 } from 'lucide-vue-next';
+import { computed, ref, watch } from 'vue';
+
+const category_id = computed(() => usePage().props.category_id as any);
+
 const form = useForm({
     quiz_category_id: category_id.value as any,
     pertanyaan: '',
@@ -20,21 +24,23 @@ const form = useForm({
 const imagePreview = ref<string | null>(null);
 
 // LOGIK OTOMATIS UNTUK BENAR / SALAH
-watch(() => form.tipe, (newType) => {
-    if (newType === 'benar_salah') {
-        form.pilihan = [
-            { label: 'A', teks: 'Benar' },
-            { label: 'B', teks: 'Salah' },
-        ];
-        form.jawaban_benar = ''; // Reset kunci
-    } else if (newType === 'pilihan_ganda') {
-        // Kembalikan ke format default pilihan ganda jika pindah tipe
-        form.pilihan = [
-            { label: 'A', teks: '' },
-            { label: 'B', teks: '' },
-        ];
-    }
-});
+watch(
+    () => form.tipe,
+    (newType) => {
+        if (newType === 'benar_salah') {
+            form.pilihan = [
+                { label: 'A', teks: 'Benar' },
+                { label: 'B', teks: 'Salah' },
+            ];
+            form.jawaban_benar = '';
+        } else if (newType === 'pilihan_ganda') {
+            form.pilihan = [
+                { label: 'A', teks: '' },
+                { label: 'B', teks: '' },
+            ];
+        }
+    },
+);
 
 const tambahOpsi = () => {
     const nextLabel = String.fromCharCode(65 + form.pilihan.length);
@@ -62,135 +68,219 @@ const handleFileUpload = (e: any) => {
 };
 
 const submit = () => {
-    console.log(form.data());
-
-    form.post(simpanBankSoal({
-        id: 1
-    }).url, { forceFormData: true });
+    form.post(
+        simpanBankSoal({
+            id: category_id.value,
+        }).url,
+        { forceFormData: true },
+    );
 };
 </script>
 
 <template>
+    <Head title="Tambah Soal - Administrasi UBK" />
 
-    <Head title="Tambah Soal" />
+    <div class="min-h-screen bg-[#e1e4e8] font-serif text-[#333]">
+        <div class="flex items-center justify-between border-b-4 border-[#ffcc00] bg-[#003366] px-4 py-2 text-white shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="rounded-sm bg-white p-1">
+                    <div class="flex h-8 w-8 items-center justify-center bg-[#003366] text-[10px] font-bold text-white italic">UBK</div>
+                </div>
+                <div>
+                    <h1 class="text-sm leading-none font-bold tracking-wider uppercase">Entry Bank Soal Baru</h1>
+                    <span class="font-mono text-[10px] tracking-tighter text-[#ffcc00] uppercase italic"
+                        >Kategori: {{ $page.props.category_nama || 'Pemrograman Web Dasar' }}</span
+                    >
+                </div>
+            </div>
+            <button
+                @click="(window as any).history.back()"
+                class="flex items-center gap-1 text-xs font-bold tracking-tighter uppercase hover:text-[#ffcc00]"
+            >
+                <ChevronLeft :size="14" /> Kembali ke Daftar
+            </button>
+        </div>
 
-    <div class="max-w-5xl mx-auto py-8 px-4">
-        <PageTitle title="Tambah Soal Baru" subtitle="Kategori: Pemrograman Web Dasar" />
-
-        <form @submit.prevent="submit" class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Pertanyaan</label>
-                        <textarea v-model="form.pertanyaan" rows="5"
-                            class="w-full px-4 py-3 border rounded-xl border-slate-200 focus:ring-2 focus:ring-indigo-500 transition placeholder:text-slate-400"
-                            placeholder="Contoh: Apakah HTML adalah bahasa pemrograman?"></textarea>
-                    </div>
-
-                    <div v-if="form.tipe === 'pilihan_ganda' || form.tipe === 'benar_salah'" class="space-y-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <h3 class="text-sm font-bold text-slate-800 uppercase tracking-widest">
-                                {{ form.tipe === 'benar_salah' ? 'Opsi Benar/Salah' : 'Opsi Jawaban' }}
-                            </h3>
-                            <span class="text-xs text-slate-500 italic">*Klik huruf untuk kunci</span>
-                        </div>
-
-                        <div v-for="(opt, index) in form.pilihan" :key="index" class="group flex items-start gap-3">
-                            <button type="button" @click="form.jawaban_benar = opt.label" :class="[
-                                'mt-1 w-10 h-10 shrink-0 rounded-lg flex items-center justify-center font-bold transition-all border-2',
-                                form.jawaban_benar === opt.label
-                                    ? 'bg-green-500 border-green-600 text-white shadow-md'
-                                    : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-indigo-400'
-                            ]">
-                                {{ opt.label }}
-                            </button>
-
-                            <div class="relative w-full">
-                                <input type="text" v-model="opt.teks" :disabled="form.tipe === 'benar_salah'" :class="[
-                                    'w-full px-4 py-2.5 rounded-lg border border-slate-200 focus:border-indigo-500 focus:ring-0 outline-none transition',
-                                    form.tipe === 'benar_salah' ? 'bg-slate-100 font-semibold text-slate-700 cursor-not-allowed' : ''
-                                ]" :placeholder="'Ketik jawaban ' + opt.label" />
-                                <button v-if="form.pilihan.length > 2 && form.tipe !== 'benar_salah'"
-                                    @click="hapusOpsi(index)" type="button"
-                                    class="absolute right-2 top-2.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+        <div class="mx-auto max-w-7xl p-6">
+            <form @submit.prevent="submit" class="grid grid-cols-12 gap-6">
+                <div class="col-span-12 space-y-4 lg:col-span-8">
+                    <div class="border border-gray-400 bg-white p-6 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                        <div class="mb-6">
+                            <label class="mb-2 block text-xs font-bold text-[#003366] uppercase">Input Teks Pertanyaan</label>
+                            <textarea
+                                v-model="form.pertanyaan"
+                                rows="6"
+                                class="w-full rounded-none border border-gray-400 px-4 py-3 font-sans text-sm leading-relaxed outline-none focus:bg-yellow-50"
+                                placeholder="Tuliskan pertanyaan ujian di sini..."
+                            ></textarea>
+                            <div
+                                v-if="form.errors.pertanyaan"
+                                class="mt-1 border-l-2 border-red-600 pl-2 text-[10px] font-bold text-red-600 uppercase italic"
+                            >
+                                [Peringatan: {{ form.errors.pertanyaan }}]
                             </div>
                         </div>
 
-                        <button v-if="form.pilihan.length < 5 && form.tipe === 'pilihan_ganda'" @click="tambahOpsi"
-                            type="button"
-                            class="w-full py-2 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition flex items-center justify-center gap-2 text-sm">
-                            + Tambah Pilihan
-                        </button>
-                    </div>
+                        <div v-if="['pilihan_ganda', 'benar_salah'].includes(form.tipe)" class="space-y-4 border-t border-gray-200 pt-6">
+                            <div class="mb-4 flex items-center justify-between">
+                                <h3 class="flex items-center gap-2 text-xs font-bold tracking-widest text-gray-500 uppercase">
+                                    <span class="h-2 w-2 bg-gray-500"></span> Opsi Jawaban {{ form.tipe === 'benar_salah' ? '(B/S)' : '' }}
+                                </h3>
+                                <span class="text-[10px] font-bold text-red-600 uppercase italic">Klik Huruf Untuk Menentukan Kunci</span>
+                            </div>
 
-                    <div v-else
-                        class="p-8 border-2 border-dashed border-slate-100 rounded-xl text-center text-slate-400">
-                        Tipe soal {{ form.tipe.replace('_', ' ') }} tidak memerlukan opsi pilihan ganda.
-                    </div>
-                </div>
-            </div>
+                            <div v-for="(opt, index) in form.pilihan" :key="index" class="group flex items-start gap-4">
+                                <button
+                                    type="button"
+                                    @click="form.jawaban_benar = opt.label"
+                                    :class="[
+                                        'flex h-10 w-10 items-center justify-center border text-sm font-bold shadow-[1px_1px_0px_rgba(0,0,0,1)] transition-all',
+                                        form.jawaban_benar === opt.label
+                                            ? 'border-black bg-[#006633] text-white'
+                                            : 'border-gray-400 bg-[#f0f0f0] text-gray-400 hover:bg-[#ffcc00] hover:text-black',
+                                    ]"
+                                >
+                                    {{ opt.label }}
+                                </button>
 
-            <div class="space-y-6">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Tipe Soal</label>
-                        <select v-model="form.tipe"
-                            class="w-full p-3 bg-slate-50 border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="pilihan_ganda">Pilihan Ganda</option>
-                            <option value="benar_salah">Benar / Salah</option>
-                            <option value="isian_singkat">Isian Singkat</option>
-                            <option value="essay">Essay</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Bobot Soal</label>
-                        <input v-model="form.bobot" type="number" min="1"
-                            class="w-full bg-white border-2 border-gray-100 px-4 py-2 rounded-xl focus:outline-none focus:border-indigo-500 font-bold text-gray-800"
-                            placeholder="Contoh: 5" />
-                        <p class="text-[10px] text-gray-500 font-medium">
-                            *Poin yang didapat siswa jika menjawab benar pada soal ini.
-                        </p>
-                    </div>
+                                <div class="relative w-full">
+                                    <input
+                                        type="text"
+                                        v-model="opt.teks"
+                                        :disabled="form.tipe === 'benar_salah'"
+                                        class="w-full rounded-none border border-gray-400 px-4 py-2 text-sm font-bold text-[#003366] italic outline-none focus:bg-yellow-50 disabled:bg-gray-100 disabled:text-gray-500"
+                                        :placeholder="'Ketik Jawaban ' + opt.label"
+                                    />
 
-                    <div class="p-4 rounded-xl bg-indigo-50 border border-indigo-100 flex flex-col items-center">
-                        <span class="text-[10px] font-black text-indigo-400 uppercase">Kunci Terpilih</span>
-                        <div class="text-4xl font-black text-indigo-700">
-                            {{ form.jawaban_benar || '?' }}
+                                    <button
+                                        v-if="form.pilihan.length > 2 && form.tipe !== 'benar_salah'"
+                                        @click="hapusOpsi(index)"
+                                        type="button"
+                                        class="absolute top-2 right-2 text-red-700 opacity-0 transition group-hover:opacity-100"
+                                    >
+                                        <Trash2 :size="14" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button
+                                v-if="form.pilihan.length < 5 && form.tipe === 'pilihan_ganda'"
+                                @click="tambahOpsi"
+                                type="button"
+                                class="flex w-full items-center justify-center gap-2 border border-dashed border-gray-400 bg-gray-50 py-2 text-[10px] font-bold tracking-tighter text-gray-500 uppercase transition hover:bg-[#e1e4e8]"
+                            >
+                                <Plus :size="14" /> Tambah Pilihan Jawaban
+                            </button>
                         </div>
-                        <span v-if="form.jawaban_benar && form.tipe === 'benar_salah'"
-                            class="text-xs font-bold text-indigo-500">
-                            ({{form.pilihan.find(p => p.label === form.jawaban_benar)?.teks}})
-                        </span>
+
+                        <div
+                            v-else
+                            class="border border-gray-300 bg-gray-50 p-10 text-center text-xs font-bold tracking-widest text-gray-400 uppercase italic"
+                        >
+                            Tipe {{ form.tipe.replace('_', ' ') }} Tidak Membutuhkan Opsi Pilihan
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <label class="block text-sm font-bold text-slate-700 mb-3">Lampiran Gambar</label>
-                    <div v-if="!imagePreview"
-                        class="relative group border-2 border-dashed border-slate-200 p-6 rounded-xl hover:border-indigo-400 transition cursor-pointer text-center">
-                        <input type="file" @change="handleFileUpload"
-                            class="absolute inset-0 opacity-0 cursor-pointer" />
-                        <p class="text-xs text-slate-400">Klik untuk upload gambar</p>
-                    </div>
-                    <div v-else class="relative group">
-                        <img :src="imagePreview" class="w-full h-auto rounded-xl border" />
-                        <button @click="imagePreview = null; form.lampiran_gambar = null" type="button"
-                            class="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full shadow-lg">✕</button>
-                    </div>
-                </div>
+                <div class="col-span-12 space-y-4 lg:col-span-4">
+                    <div class="border border-gray-400 bg-white p-5 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                        <div class="mb-4">
+                            <label class="mb-1 block text-[10px] font-bold text-gray-500 uppercase">Pilih Tipe Soal</label>
+                            <select
+                                v-model="form.tipe"
+                                class="w-full cursor-pointer border border-gray-400 bg-[#f0f0f0] p-2 text-xs font-bold uppercase outline-none focus:bg-yellow-50"
+                            >
+                                <option value="pilihan_ganda">PILIHAN GANDA</option>
+                                <option value="benar_salah">BENAR / SALAH</option>
+                                <option value="isian_singkat">ISIAN SINGKAT</option>
+                                <option value="essay">ESSAY / URAIAN</option>
+                            </select>
+                        </div>
 
-                <button type="submit" :disabled="form.processing"
-                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl transition shadow-xl shadow-indigo-100">
-                    {{ form.processing ? 'Menyimpan...' : 'Simpan Soal' }}
-                </button>
-            </div>
-        </form>
+                        <div class="mb-4">
+                            <label class="mb-1 block text-[10px] font-bold text-gray-500 uppercase">Bobot Soal (Point)</label>
+                            <input
+                                v-model="form.bobot"
+                                type="number"
+                                min="1"
+                                class="w-full border border-gray-400 bg-[#f0f0f0] px-3 py-2 text-sm font-black text-[#006633] outline-none"
+                            />
+                        </div>
+
+                        <div class="relative mt-6 overflow-hidden border-2 border-[#003366] bg-[#f0f0f0] p-4 text-center shadow-inner">
+                            <span class="absolute top-1 left-1 font-sans text-[9px] font-bold text-[#003366] uppercase italic">Kunci Aktif:</span>
+                            <div class="py-2 font-mono text-5xl leading-none font-black text-[#003366]">
+                                {{ form.jawaban_benar || '?' }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border border-gray-400 bg-white p-5 shadow-[2px_2px_0px_rgba(0,0,0,0.1)]">
+                        <label class="mb-2 block flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase">
+                            <ImageIcon :size="12" /> Media Lampiran (Opsional)
+                        </label>
+
+                        <div
+                            v-if="!imagePreview"
+                            class="group relative cursor-pointer border border-dashed border-gray-400 bg-gray-50 p-6 text-center transition hover:bg-gray-100"
+                        >
+                            <input type="file" @change="handleFileUpload" class="absolute inset-0 cursor-pointer opacity-0" />
+                            <p class="text-[10px] font-bold tracking-tighter text-gray-400 uppercase italic group-hover:text-gray-600">
+                                Klik Untuk Import Gambar
+                            </p>
+                        </div>
+
+                        <div v-else class="group relative border border-gray-400 bg-gray-100 p-1 shadow-inner">
+                            <img :src="imagePreview" class="mx-auto h-auto max-h-40 w-full object-contain" />
+                            <button
+                                @click="
+                                    imagePreview = null;
+                                    form.lampiran_gambar = null;
+                                "
+                                type="button"
+                                class="absolute top-1 right-1 border border-black bg-red-700 px-2 py-0.5 text-[10px] font-bold text-white shadow-[1px_1px_0px_#000]"
+                            >
+                                RESET
+                            </button>
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        :disabled="form.processing"
+                        class="flex w-full items-center justify-center gap-2 border-b-4 border-black bg-[#006633] py-4 text-xs font-bold tracking-[0.2em] text-white uppercase shadow-lg transition hover:bg-black active:translate-y-[2px] active:border-b-0"
+                    >
+                        <Save :size="16" /> {{ form.processing ? 'Proses Simpan...' : 'Simpan Ke Database' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div
+            class="fixed right-0 bottom-0 left-0 flex justify-between border-t border-[#ffcc00] bg-[#003366] px-4 py-1 font-mono text-[9px] text-white uppercase opacity-80"
+        >
+            <span>System Log: Ready for Entry</span>
+            <span>Server Time: {{ new Date().toLocaleTimeString() }}</span>
+        </div>
     </div>
 </template>
+
+<style scoped>
+/* Reset font untuk simulasi aplikasi jadul */
+button,
+input,
+select,
+textarea {
+    font-family: 'Arial', sans-serif;
+    border-radius: 0px !important;
+}
+
+select {
+    appearance: auto !important;
+}
+
+/* Transisi halus tapi tetap boxy */
+button:active {
+    box-shadow: none !important;
+}
+</style>

@@ -68,6 +68,9 @@ class QuizController extends Controller
             'score_result' => $nilai,
             'end_date' => Carbon::now(),
         ]);
+        return to_route('siwaQuizDetail', [
+            'id' => $id,
+        ]);
     }
     public function autoSaveJawaban(Request $request, string $jadwal, string $history)
     {

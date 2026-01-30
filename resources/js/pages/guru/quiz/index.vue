@@ -1,10 +1,10 @@
 <template>
     <PageTitle title="Manajemen Quiz" subtitle="Kelola Quiz untuk guru disini" />
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <Link :href="jadwalQuizGuru()" class="flex items-center p-4 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-            <div class="p-2 bg-gray-100 rounded mr-3">
-                <i class="text-gray-600 font-bold italic">#</i>
+    <div class="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Link :href="jadwalQuizGuru()" class="flex items-center rounded border border-gray-300 bg-white p-4 transition-colors hover:bg-gray-50">
+            <div class="mr-3 rounded bg-gray-100 p-2">
+                <i class="font-bold text-gray-600 italic">#</i>
             </div>
             <div>
                 <div class="font-semibold text-gray-800">Kelola Jadwal</div>
@@ -12,9 +12,9 @@
             </div>
         </Link>
 
-        <Link :href="bankSoalGuru()" class="flex items-center p-4 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-            <div class="p-2 bg-gray-100 rounded mr-3">
-                <i class="text-gray-600 font-bold italic">?</i>
+        <Link :href="bankSoalGuru()" class="flex items-center rounded border border-gray-300 bg-white p-4 transition-colors hover:bg-gray-50">
+            <div class="mr-3 rounded bg-gray-100 p-2">
+                <i class="font-bold text-gray-600 italic">?</i>
             </div>
             <div>
                 <div class="font-semibold text-gray-800">Kelola Bank Soal</div>
@@ -22,9 +22,9 @@
             </div>
         </Link>
 
-        <Link href="/quiz/hasil" class="flex items-center p-4 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-            <div class="p-2 bg-gray-100 rounded mr-3">
-                <i class="text-gray-600 font-bold italic">%</i>
+        <Link :href="evaluasiController()" class="flex items-center rounded border border-gray-300 bg-white p-4 transition-colors hover:bg-gray-50">
+            <div class="mr-3 rounded bg-gray-100 p-2">
+                <i class="font-bold text-gray-600 italic">%</i>
             </div>
             <div>
                 <div class="font-semibold text-gray-800">Hasil & Evaluasi</div>
@@ -32,9 +32,9 @@
             </div>
         </Link>
 
-        <Link href="/quiz/monitoring" class="flex items-center p-4 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-            <div class="p-2 bg-gray-100 rounded mr-3">
-                <i class="text-gray-600 font-bold italic">!</i>
+        <Link href="/quiz/monitoring" class="flex items-center rounded border border-gray-300 bg-white p-4 transition-colors hover:bg-gray-50">
+            <div class="mr-3 rounded bg-gray-100 p-2">
+                <i class="font-bold text-gray-600 italic">!</i>
             </div>
             <div>
                 <div class="font-semibold text-gray-800">Monitoring</div>
@@ -46,7 +46,6 @@
 
 <script setup lang="ts">
 import PageTitle from '@/layouts/page-title.vue';
-import { jadwalQuizGuru,bankSoalGuru } from '@/routes';
+import { bankSoalGuru, evaluasiController, jadwalQuizGuru } from '@/routes';
 import { Link } from '@inertiajs/vue3';
-
 </script>

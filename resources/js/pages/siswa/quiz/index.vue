@@ -16,66 +16,153 @@ const formatANBK = (dateStr: string) => {
 </script>
 
 <template>
-    <div class="mx-auto max-w-6xl p-4 font-sans text-slate-700">
-        <div class="overflow-hidden border border-slate-300 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-300 bg-slate-50 p-3">
-                <h2 class="text-sm font-bold tracking-wide text-slate-600 uppercase">Daftar Riwayat Ujian</h2>
-                <span class="rounded bg-blue-600 px-2 py-0.5 text-[11px] text-white">Total: {{ histories.length }}</span>
+    <div class="p-4 font-serif text-[#333]">
+        <div class="mx-auto mb-6 max-w-6xl border-b-4 border-[#ffcc00] bg-[#003366] px-4 py-3 text-white shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="rounded-sm bg-white p-1 text-lg leading-none font-black text-[#003366]">H</div>
+                    <div>
+                        <h1 class="text-sm leading-none font-bold tracking-wider uppercase">Riwayat Aktivitas Ujian</h1>
+                        <p class="mt-1 font-mono text-[10px] tracking-tighter text-[#ffcc00] uppercase italic">Log Data Pengerjaan Siswa</p>
+                    </div>
+                </div>
+                <div class="text-right font-mono text-[11px] uppercase">
+                    Terdata: <span class="bg-white px-2 font-bold text-[#003366]">{{ histories.length }} Record</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mx-auto max-w-6xl">
+            <div
+                class="hidden border-x border-t border-gray-400 bg-[#003366] p-2 px-4 text-[10px] font-bold tracking-widest text-white uppercase md:flex"
+            >
+                <div class="flex-1">Detail Mata Uji & Kategori</div>
+                <div class="w-40 text-center">Status</div>
+                <div class="w-24 text-center">Nilai</div>
+                <div class="w-32 text-right">Aksi Sistem</div>
             </div>
 
-            <div
-                v-for="(history, index) in histories"
-                :key="history.id"
-                :class="[
-                    'flex flex-col gap-4 border-b border-slate-200 p-3 transition md:flex-row md:items-center',
-                    (index as any) % 2 === 0 ? 'bg-white' : 'bg-slate-50/50',
-                ]"
-            >
-                <div class="flex flex-1 items-start gap-3">
-                    <div class="mt-1 text-xs font-bold text-slate-400">{{ (index as any) + 1 }}.</div>
-                    <div>
-                        <div class="text-[10px] font-bold text-blue-500 uppercase">{{ history.jadwal_quiz.judul }}</div>
-                        <h3 class="text-sm leading-tight font-bold text-slate-800">{{ history.jadwal_quiz.judul }}</h3>
-                        <div class="mt-1 flex gap-3 text-[11px] text-slate-500 italic">
-                            <span>Jml. Soal: {{ history.jadwal_quiz.total_soal }}</span>
-                            <span>Waktu: {{ history.jadwal_quiz.durasi }} Menit</span>
-                            <span>KKM: {{ history.jadwal_quiz.kkm }}</span>
+            <div class="overflow-hidden border border-gray-400 bg-white shadow-sm">
+                <div
+                    v-for="(history, index) in histories"
+                    :key="history.id"
+                    :class="[
+                        'group flex flex-col gap-4 border-b border-gray-300 p-4 transition md:flex-row md:items-center',
+                        (index as any) % 2 === 0 ? 'bg-white' : 'bg-[#f4f7f9]',
+                    ]"
+                >
+                    <div class="flex flex-1 items-start gap-4">
+                        <div class="mt-1 font-mono text-xs font-bold text-gray-400">{{ (index as any) + 1 }}.</div>
+                        <div>
+                            <div
+                                class="mb-1 inline-block border-b border-gray-200 text-[10px] font-bold tracking-tighter text-[#003366] uppercase italic"
+                            >
+                                {{ history.jadwal_quiz.judul }}
+                            </div>
+                            <h3 class="text-sm leading-tight font-black text-gray-800 uppercase transition-colors group-hover:text-blue-700">
+                                {{ history.jadwal_quiz.judul }}
+                            </h3>
+                            <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] font-bold text-gray-500 uppercase">
+                                <span class="flex items-center gap-1 text-slate-400">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                                    Soal: {{ history.jadwal_quiz.total_soal }} Item
+                                </span>
+                                <span class="flex items-center gap-1 text-slate-400">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
+                                    Durasi: {{ history.jadwal_quiz.durasi }}'
+                                </span>
+                                <span class="flex items-center gap-1 border-l border-gray-300 pl-3 text-slate-400">
+                                    Tgl Selesai: {{ formatANBK(history.end_date) }}
+                                </span>
+                            </div>
                         </div>
+                    </div>
+
+                    <div
+                        class="flex w-full flex-row justify-between border-t border-dashed border-gray-200 pt-3 md:w-40 md:flex-col md:justify-center md:border-none md:pt-0 md:text-center"
+                    >
+                        <span class="text-[9px] font-bold text-gray-400 uppercase md:hidden">Status Pengerjaan</span>
+                        <span
+                            :class="[
+                                'inline-block border px-2 py-0.5 text-xs font-black',
+                                history.end_date ? 'border-green-600 bg-green-50 text-green-700' : 'border-orange-600 bg-orange-50 text-orange-700',
+                            ]"
+                        >
+                            {{ history.end_date ? 'SELESAI' : 'BELUM SELESAI' }}
+                        </span>
+                    </div>
+
+                    <div
+                        class="flex w-full flex-row justify-between md:w-24 md:flex-col md:justify-center md:border-l md:border-gray-200 md:text-center"
+                    >
+                        <span class="text-[9px] font-bold text-gray-400 uppercase md:hidden">Skor Hasil</span>
+                        <div class="flex flex-col">
+                            <span
+                                :class="[
+                                    'text-lg leading-none font-black',
+                                    history.score_result >= (history.jadwal_quiz.kkm || 75) ? 'text-blue-700' : 'text-red-600',
+                                ]"
+                            >
+                                {{ history.score_result != null ? Math.round(history.score_result) : '-' }}
+                            </span>
+                            <span class="mt-1 text-[8px] font-bold text-gray-400 uppercase">KKM: {{ history.jadwal_quiz.kkm }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end md:w-32">
+                        <Link
+                            :href="history.end_date ? hasilDetail({ history_id: history.id }) : `/quiz/kerjakan/${history.id}`"
+                            :class="[
+                                'border border-black px-4 py-1.5 text-[10px] font-bold uppercase shadow-[2px_2px_0px_#888] transition active:translate-y-[1px] active:shadow-none',
+                                history.end_date
+                                    ? 'bg-[#ffcc00] text-black hover:bg-black hover:text-white'
+                                    : 'bg-[#003366] text-white hover:bg-black',
+                            ]"
+                        >
+                            {{ history.end_date ? 'Lihat Hasil' : 'Lanjutkan' }}
+                        </Link>
                     </div>
                 </div>
 
-                <div class="flex min-w-[150px] flex-row justify-between text-left md:flex-col md:justify-center md:text-right">
-                    <span class="text-[10px] leading-none font-bold text-slate-400 uppercase">Status</span>
-                    <span :class="['mt-0.5 text-xs font-bold', history.end_date ? 'text-green-600' : 'text-orange-500']">
-                        {{ history.end_date ? 'SELESAI' : 'BELUM SELESAI' }}
-                    </span>
-                </div>
-
-                <div
-                    class="flex min-w-[80px] flex-row justify-between text-left md:flex-col md:justify-center md:border-l md:border-slate-200 md:pl-4 md:text-right"
-                >
-                    <span class="text-[10px] leading-none font-bold text-slate-400 uppercase">Skor</span>
-                    <span :class="['mt-0.5 text-sm font-black', history.score_result >= history.jadwal_quiz.kkm ? 'text-blue-600' : 'text-red-500']">
-                        {{ history.score_result != null ? Math.round(history.score_result) : '-' }}
-                    </span>
-                </div>
-
-                <div class="flex justify-end">
-                    <Link
-                        :href="history.end_date ? hasilDetail({ history_id: history.id }) : `/quiz/kerjakan/${history.id}`"
-                        :class="[
-                            'rounded border px-4 py-1.5 text-[11px] font-bold uppercase transition',
-                            history.end_date
-                                ? 'border-slate-300 bg-white text-slate-600 hover:bg-slate-100'
-                                : 'border-blue-700 bg-blue-600 text-white shadow-sm hover:bg-blue-700',
-                        ]"
-                    >
-                        {{ history.end_date ? 'Lihat Hasil' : 'Lanjutkan' }}
-                    </Link>
+                <div v-if="histories.length === 0" class="border-b border-gray-300 bg-gray-50 p-20 text-center">
+                    <p class="font-mono text-xs font-bold tracking-widest text-gray-400 uppercase italic">
+                        -- Tidak ada rekaman riwayat aktivitas ditemukan --
+                    </p>
                 </div>
             </div>
 
-            <div v-if="histories.length === 0" class="p-10 text-center text-xs text-slate-400 italic">Tidak ada data riwayat ujian ditemukan.</div>
+            <div class="mt-4 border border-gray-400 bg-[#fefefe] p-3 text-[10px] font-medium text-gray-500 italic shadow-sm">
+                * Data riwayat pengerjaan bersifat permanen dan tidak dapat diubah oleh siswa. Silakan hubungi proktor/admin sekolah jika terdapat
+                ketidaksinkronan data nilai.
+            </div>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* Reset Font untuk look jadul */
+button,
+h1,
+h2,
+h3,
+div,
+a {
+    font-family: 'Arial', sans-serif;
+}
+
+.font-mono {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Hilangkan rounded secara paksa */
+.rounded,
+.rounded-sm,
+.rounded-xl {
+    border-radius: 0px !important;
+}
+
+/* Memastikan border collapse pada grid sistem jadul */
+.border-b {
+    border-bottom-width: 1px;
+}
+</style>

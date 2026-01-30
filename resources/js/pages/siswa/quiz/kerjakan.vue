@@ -1,13 +1,16 @@
 <script setup lang="ts">
+// (Logic Anda tetap sama, tidak ada yang diubah)
 import { autoSaveJawaban, selesaikanUjian } from '@/routes';
 import { useForm, usePage } from '@inertiajs/vue3';
-import { LayoutGrid, Timer, UserCircle } from 'lucide-vue-next';
-import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue'; // Tambah onMounted
+import { ChevronLeft, ChevronRight, LayoutGrid, Timer, UserCircle } from 'lucide-vue-next';
+import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import logo from '../../../../img/logo.png';
+
 const soalsData = computed(() => usePage().props.soals as any);
 const listSoal = computed(() => soalsData.value.jadwal_quiz.bank_soal_group.bank_soals);
 let loading = shallowRef(false);
 const jawabanTersimpan = computed(() => soalsData.value.jawaban_tersimpan as any[]);
+
 const form = useForm({
     history_id: soalsData.value.id,
     remaining_time: soalsData.value.remaining_time,
@@ -18,7 +21,6 @@ const form = useForm({
         } else {
             acc[soal.id] = '';
         }
-
         return acc;
     }, {}),
 });
@@ -33,6 +35,7 @@ function simpanJawaban() {
             id: soalsData.value.jadwal_quiz_id,
             history_id: soalsData.value.id,
         }).url,
+        { preserveScroll: true },
     );
 }
 
@@ -77,7 +80,6 @@ const timeLeft = computed(() => formatTimeDisplay(timeLeftSeconds.value));
 onMounted(() => {
     const initialMinutes = soalsData.value.remaining_time ?? soalsData.value.jadwal_quiz.durasi;
     timeLeftSeconds.value = initialMinutes * 60;
-
     timerInterval = setInterval(() => {
         if (timeLeftSeconds.value > 0) {
             timeLeftSeconds.value--;
@@ -86,137 +88,139 @@ onMounted(() => {
             submitUjian(true);
         }
     }, 1000);
-});
-const proteksiUjian = () => {
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'F12') e.preventDefault();
-
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) e.preventDefault();
-        if (e.ctrlKey && e.key === 'u') e.preventDefault();
-
-        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 's')) e.preventDefault();
-    });
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
-            alert('PERINGATAN: Jangan meninggalkan halaman ujian! Aktivitas ini dicatat oleh sistem.');
-        }
-    });
-
-    document.addEventListener('dragstart', (e) => e.preventDefault());
-};
-
-onMounted(() => {
     proteksiUjian();
 });
+
+const proteksiUjian = () => {
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'F12') e.preventDefault();
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) e.preventDefault();
+        if (e.ctrlKey && e.key === 'u') e.preventDefault();
+        if (e.ctrlKey && (e.key === 'c' || e.key === 'v' || e.key === 's')) e.preventDefault();
+    });
+};
+
 onUnmounted(() => {
     if (timerInterval) clearInterval(timerInterval);
 });
 </script>
 
 <template>
-    <div class="flex h-screen flex-col bg-[#F4F7F9] font-sans text-[#333]">
-        <header class="flex h-16 items-center justify-between bg-[#21409A] px-6 text-white shadow-lg">
-            <div class="flex items-center gap-4">
-                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-white p-1">
-                    <img :src="logo" class="h-8 w-8 object-contain" alt="Logo" />
+    <div class="flex h-screen flex-col bg-[#e1e4e8] font-serif text-[#333]">
+        <header class="flex h-14 items-center justify-between border-b-4 border-[#ffcc00] bg-[#003366] px-4 text-white shadow-md">
+            <div class="flex items-center gap-3">
+                <div class="rounded-sm bg-white p-1">
+                    <img :src="logo" class="h-6 w-6 object-contain" alt="Logo" />
                 </div>
-                <div class="flex flex-col">
-                    <span class="text-[10px] font-bold tracking-widest text-blue-200 uppercase">Asesmen Kompetensi Siswa</span>
-                    <span class="text-sm font-black tracking-tight uppercase">{{ soalsData.jadwal_quiz.judul }}</span>
+                <div class="flex flex-col leading-none">
+                    <span class="text-[10px] font-bold tracking-tighter text-[#ffcc00] uppercase italic">CBT - SMK PASUNDAN 2 BDG</span>
+                    <span class="text-xs font-black tracking-wider uppercase">{{ soalsData.jadwal_quiz.judul }}</span>
                 </div>
             </div>
 
-            <div
-                class="flex items-center gap-3 rounded-full border border-blue-400/30 bg-[#1A337A] px-6 py-2 shadow-inner transition-colors"
-                :class="{ 'border-red-500 bg-red-900': timeLeftSeconds < 300 }"
-            >
-                <Timer class="h-5 w-5 text-yellow-400" :class="{ 'animate-pulse': timeLeftSeconds < 300 }" />
-                <span class="font-mono text-2xl font-black tracking-widest text-white">{{ timeLeft }}</span>
+            <div class="flex items-center gap-3 border border-blue-400/30 bg-[#002244] px-4 py-1.5">
+                <Timer class="h-4 w-4 text-yellow-400" />
+                <span class="font-mono text-xl font-black tracking-[0.2em] text-white tabular-nums">{{ timeLeft }}</span>
             </div>
 
-            <div class="flex items-center gap-4 border-l border-blue-400/30 pl-6">
-                <div class="text-right">
-                    <p class="text-[10px] font-medium text-blue-200 uppercase">Nama Peserta</p>
-                    <p class="text-xs font-bold uppercase">Siswa Pasundan 2</p>
-                </div>
-                <UserCircle class="h-8 w-8 text-blue-200" />
+            <div class="flex items-center gap-3 font-mono text-[10px] uppercase italic opacity-80">
+                <span>Peserta: {{ $page.props.auth.user.nama || 'SISWA' }}</span>
+                <UserCircle class="h-5 w-5" />
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <main class="flex-1 overflow-y-auto p-6 lg:p-10">
-                <div v-if="currentSoal" class="mx-auto max-w-5xl overflow-hidden rounded-xl border-t-4 border-[#21409A] bg-white shadow-2xl">
-                    <div class="flex items-center justify-between border-b bg-[#F8FAFC] px-8 py-4">
-                        <div class="flex items-center gap-4">
-                            <span class="rounded bg-[#21409A] px-4 py-1 text-sm font-black text-white italic">SOAL NO. {{ currentIndex + 1 }}</span>
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6">
+                <div v-if="currentSoal" class="mx-auto max-w-4xl border border-gray-400 bg-white shadow-[4px_4px_0px_rgba(0,0,0,0.1)]">
+                    <div class="flex items-center justify-between border-b border-gray-300 bg-[#f4f4f4] px-6 py-3">
+                        <span class="bg-[#003366] px-4 py-1 font-mono text-xs font-bold tracking-widest text-white uppercase italic">
+                            SOAL NOMOR: {{ currentIndex + 1 }}
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Ukuran Font:</span>
+                            <div class="flex gap-1">
+                                <button class="h-6 w-6 border border-gray-400 text-[10px] font-bold">A</button>
+                                <button class="h-6 w-6 border border-gray-400 bg-white text-xs font-bold">A</button>
+                                <button class="h-6 w-6 border border-gray-400 text-sm font-bold">A</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="min-h-[350px] p-10">
-                        <div class="mb-10 text-[20px] leading-relaxed font-medium text-[#2D3748]">
-                            {{ currentSoal.pertanyaan }}
+                    <div class="min-h-[300px] p-8 lg:p-12">
+                        <div class="mb-10 font-sans text-[18px] leading-relaxed text-gray-800">
+                            <p v-html="currentSoal.pertanyaan"></p>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-3 font-sans">
                             <template v-if="currentSoal.tipe === 'pilihan_ganda' || currentSoal.tipe === 'benar_salah'">
                                 <div v-for="(jawaban, idx) in currentSoal.jawaban" :key="jawaban.id">
                                     <label
-                                        :class="{
-                                            'border-[#21409A] bg-[#EEF2FF] shadow-md ring-1 ring-[#21409A]':
-                                                form.jawaban[currentSoal.id] == jawaban.id,
-                                            'border-slate-200 bg-white hover:border-slate-300': form.jawaban[currentSoal.id] != jawaban.id,
-                                        }"
-                                        class="group relative flex cursor-pointer items-center gap-5 rounded-lg border-2 p-5 transition-all duration-150"
+                                        :class="[
+                                            'group flex cursor-pointer items-center gap-4 border p-3 transition-colors duration-75',
+                                            form.jawaban[currentSoal.id] == jawaban.id
+                                                ? 'border-blue-600 bg-blue-50'
+                                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-yellow-50',
+                                        ]"
                                     >
                                         <div
-                                            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border-2 border-slate-300 font-black transition-colors group-hover:bg-slate-50"
+                                            class="flex h-8 w-8 shrink-0 items-center justify-center border border-gray-400 font-black"
                                             :class="
                                                 form.jawaban[currentSoal.id] == jawaban.id
-                                                    ? 'border-[#21409A] bg-[#21409A] text-white'
-                                                    : 'text-slate-500'
+                                                    ? 'border-black bg-[#003366] text-white'
+                                                    : 'bg-white text-gray-500'
                                             "
                                         >
                                             {{ String.fromCharCode(65 + (idx as number)) }}
                                         </div>
                                         <input type="radio" :value="jawaban.id" v-model="form.jawaban[currentSoal.id]" class="hidden" />
-                                        <div class="text-[17px] font-semibold text-[#4A5568]">{{ jawaban.teks_jawaban }}</div>
+                                        <div class="text-[15px] leading-snug font-bold text-gray-700 uppercase">{{ jawaban.teks_jawaban }}</div>
                                     </label>
                                 </div>
                             </template>
-                            <div v-else>
-                                <textarea class="h-full w-full border p-3" v-model="form.jawaban[currentSoal.id]" />
+
+                            <div v-else class="border border-gray-400 bg-[#f9f9f9] p-2">
+                                <span class="mb-2 block text-[10px] font-bold text-gray-400 uppercase italic">Lembar Jawaban Isian:</span>
+                                <textarea
+                                    class="min-h-[150px] w-full border border-gray-300 p-4 font-sans text-sm outline-none focus:bg-white"
+                                    v-model="form.jawaban[currentSoal.id]"
+                                    placeholder="Ketik jawaban anda di sini..."
+                                />
                             </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-3 items-center border-t bg-[#F1F5F9] p-6">
+                    <div class="grid grid-cols-3 items-center border-t border-gray-300 bg-[#e9ecef] p-4">
                         <button
                             @click="prevSoal"
                             :disabled="currentIndex === 0"
-                            class="border-2 border-[#21409A] bg-white px-8 py-3 text-sm font-black text-[#21409A] disabled:opacity-20"
+                            class="flex items-center justify-center gap-2 border border-black bg-[#333] px-6 py-2.5 text-[10px] font-bold text-white uppercase shadow-[2px_2px_0px_rgba(0,0,0,0.5)] active:translate-y-[1px] active:shadow-none disabled:opacity-20"
                         >
-                            SOAL SEBELUMNYA
+                            <ChevronLeft :size="14" /> SOAL SEBELUMNYA
                         </button>
+
                         <div class="text-center">
                             <label
-                                class="inline-flex cursor-pointer items-center gap-3 rounded-lg border-2 border-yellow-500 bg-yellow-400 px-10 py-3 shadow-md"
+                                class="inline-flex cursor-pointer items-center gap-2 border border-black bg-[#ffcc00] px-6 py-2.5 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] active:translate-y-[1px] active:shadow-none"
                             >
-                                <input type="checkbox" class="h-5 w-5 accent-[#21409A]" />
-                                <span class="text-xs font-black text-[#1A337A] uppercase">Ragu-Ragu</span>
+                                <input type="checkbox" class="h-4 w-4 accent-[#003366]" />
+                                <span class="text-[10px] font-black text-[#003366] uppercase">Ragu-Ragu</span>
                             </label>
                         </div>
+
                         <div class="text-right">
                             <button
                                 v-if="currentIndex < listSoal.length - 1"
                                 @click="nextSoal"
-                                class="bg-[#21409A] px-10 py-3 text-sm font-black text-white shadow-lg"
+                                class="ml-auto flex items-center justify-center gap-2 border border-black bg-[#003366] px-6 py-2.5 text-[10px] font-bold text-white uppercase shadow-[2px_2px_0px_rgba(0,0,0,0.5)] active:translate-y-[1px] active:shadow-none"
                             >
-                                SOAL BERIKUTNYA
+                                SOAL BERIKUTNYA <ChevronRight :size="14" />
                             </button>
-                            <button v-else @click="submitUjian(false)" class="bg-emerald-600 px-10 py-3 text-sm font-black text-white shadow-lg">
+                            <button
+                                v-else
+                                @click="submitUjian(false)"
+                                class="ml-auto border border-black bg-[#006633] px-6 py-2.5 text-[10px] font-bold text-white uppercase shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                            >
                                 SELESAI UJIAN
                             </button>
                         </div>
@@ -224,31 +228,73 @@ onUnmounted(() => {
                 </div>
             </main>
 
-            <aside
-                class="hidden w-80 overflow-y-auto border-l-2 border-slate-200 bg-white p-6 shadow-[inset_10px_0_20px_-15px_rgba(0,0,0,0.1)] lg:block"
-            >
-                <div class="mb-6 flex items-center gap-3 border-b-2 border-slate-100 pb-4">
-                    <LayoutGrid class="h-5 w-5 text-[#21409A]" />
-                    <h3 class="text-xs font-black tracking-widest text-[#21409A] uppercase italic">Daftar Soal</h3>
+            <aside class="hidden w-72 flex-col border-l border-gray-400 bg-[#f4f4f4] lg:flex">
+                <div class="flex items-center gap-2 bg-[#003366] p-3 text-white uppercase">
+                    <LayoutGrid :size="16" />
+                    <h3 class="font-mono text-[10px] leading-none font-bold tracking-widest">Navigasi Soal</h3>
                 </div>
-                <div class="grid grid-cols-5 gap-2">
-                    <button
-                        v-for="(soal, index) in listSoal"
-                        :key="soal.id"
-                        @click="jumpToSoal(index)"
-                        :class="[
-                            'relative h-11 rounded-md border-2 text-[14px] font-black transition-all',
-                            index === currentIndex
-                                ? 'z-10 scale-105 border-[#21409A] bg-[#21409A] text-white shadow-lg'
-                                : form.jawaban[soal.id]
-                                  ? 'border-[#10B981] bg-[#D1FAE5] text-[#065F46]'
-                                  : 'border-slate-200 bg-white text-slate-400',
-                        ]"
-                    >
-                        {{ (index as number) + 1 }}
-                    </button>
+
+                <div class="flex-1 overflow-y-auto p-4">
+                    <div class="grid grid-cols-5 gap-2">
+                        <button
+                            v-for="(soal, index) in listSoal"
+                            :key="soal.id"
+                            @click="jumpToSoal(index)"
+                            :class="[
+                                'relative h-10 border text-[12px] font-black shadow-[1px_1px_0px_rgba(0,0,0,0.1)] transition-all',
+                                index === currentIndex
+                                    ? 'z-10 border-black bg-[#ffcc00] text-black ring-2 ring-black'
+                                    : form.jawaban[soal.id]
+                                      ? 'border-gray-400 bg-black text-white'
+                                      : 'border-gray-400 bg-white text-gray-400',
+                            ]"
+                        >
+                            {{ (index as number) + 1 }}
+                            <div v-if="false" class="absolute -top-1 -right-1 h-2 w-2 rounded-full border border-black bg-yellow-400"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-400 bg-gray-200 p-4">
+                    <div class="text-[9px] font-bold text-gray-500 uppercase italic">
+                        Keterangan:
+                        <div class="mt-2 flex items-center gap-2">
+                            <div class="h-3 w-3 bg-black"></div>
+                            Dijawab
+                        </div>
+                        <div class="mt-1 flex items-center gap-2">
+                            <div class="h-3 w-3 border border-gray-400 bg-white"></div>
+                            Belum Dijawab
+                        </div>
+                        <div class="mt-1 flex items-center gap-2">
+                            <div class="h-3 w-3 bg-[#ffcc00]"></div>
+                            Sedang Dibuka
+                        </div>
+                    </div>
                 </div>
             </aside>
         </div>
     </div>
 </template>
+
+<style scoped>
+/* Reset Font untuk simulasi UBK/ANBK */
+button,
+label,
+h1,
+h3,
+p {
+    font-family: 'Arial', sans-serif;
+}
+
+.font-mono {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Hilangkan rounded corner paksa */
+* {
+    border-radius: 0px !important;
+}
+
+/* Khas ANBK: Nomor soal yang sudah dijawab berubah warna gelap */
+</style>

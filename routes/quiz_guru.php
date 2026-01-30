@@ -4,6 +4,7 @@ use App\Http\Controllers\Guru\BankSoalController;
 use App\Http\Controllers\Guru\JadwalQuizController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Guru\QuizController;
+use App\Http\Controllers\Guru\QuizEvaluasiController;
 
 Route::get('', [QuizController::class, 'index'])->name('mainGuru');
 Route::get('jadwal', [JadwalQuizController::class, 'index'])->name('jadwalQuizGuru');
@@ -24,3 +25,7 @@ Route::post('category-{id}-bank-soal-add-new', [BankSoalController::class, 'simp
 Route::get('bank-soal-{soal_id}-edit', [BankSoalController::class, 'editBankSoal'])->name('editBankSoal');
 Route::put('bank-soal-{soal_id}-edit', [BankSoalController::class, 'simpanEditBankSoal'])->name('simpanEditBankSoal');
 Route::delete('bank-soal-{soal_id}-delete', [BankSoalController::class, 'deleteSoal'])->name('deleteSoal');
+
+Route::get('hasil-dan-evaluasi', [QuizEvaluasiController::class, 'index'])->name("evaluasiController");
+Route::get('hasil-dan-evaluasi/{id}/periksa', [QuizEvaluasiController::class, 'periksa'])->name("periksaJawaban");
+Route::patch('hasil-dan-evaluasi/{id}/periksa', [QuizEvaluasiController::class, 'simpanHasilPeriksa'])->name("simpanHasilPeriksa");

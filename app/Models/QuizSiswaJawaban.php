@@ -26,4 +26,8 @@ class QuizSiswaJawaban extends Model
     {
         return $this->belongsTo(QuizJawabanSoal::class, 'quiz_jawaban_soal_id');
     }
+    public function history()
+    {
+        return $this->belongsTo(QuizSiswaHistory::class, 'quiz_siswa_history_id');
+    }
 }
