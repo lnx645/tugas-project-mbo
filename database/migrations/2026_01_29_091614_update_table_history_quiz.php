@@ -20,7 +20,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('quiz_siswa_histories', function (Blueprint $table) {
-            //
+            $table->integer('percobaan_ke')->default(1);
         });
     }
 };

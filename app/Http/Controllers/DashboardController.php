@@ -30,7 +30,7 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get();
         }
-        return inertia('home', ['pending_tugas' => $pending_tugas, 'pendingQuiz' => $this->pendingQuiz()]);
+        return inertia('home', ['pending_tugas' => $pending_tugas, 'remedial' => $this->remedial(), 'pendingQuiz' => $this->pendingQuiz()]);
     }
 
     public function pendingQuiz()
@@ -43,6 +43,26 @@ class DashboardController extends Controller
                 ->pluck('jadwal_quiz_id');
             $query->whereNotIn('id', $sudahSelesai);
         }])->first();
+        return $kelas;
+    }
+    public function remedial()
+    {
+        $user = request()->user();
+        $kelas_id = collect(request('kelas'))->get('id');
+
+        $kelas = Kelas::whereId($kelas_id)->with(['activeQuiz' => function ($query) use ($user) {
+            $sudahLulus = QuizSiswaHistory::where('siswa_id', $user->id)
+                ->whereNotNull('end_date')
+                ->whereHas('jadwalQuiz', function ($q) {
+                    $q->whereColumn('quiz_siswa_histories.score_result', '>=', 'jadwal_quizzes.kkm');
+                })
+                ->pluck('jadwal_quiz_id');
+
+            $query->whereNotIn('id', $sudahLulus);
+        }, 'activeQuiz' => function ($query) {
+            $query->where('max_attempts', '>', 1);
+        }])->first();
+
         return $kelas;
     }
 }

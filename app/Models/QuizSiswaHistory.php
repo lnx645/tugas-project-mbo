@@ -11,6 +11,7 @@ class QuizSiswaHistory extends Model
         'siswa_id',
         'start_date',
         'end_date',
+        'percobaan_ke',
         'remaining_time',
         'score_result',
     ];
